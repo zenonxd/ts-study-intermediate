@@ -288,4 +288,104 @@ execForEachLink(links);
 
 
 
-# Eventos e Callback
+# Lidando com eventos e callbacks
+
+Passamos o evento como uma string e uma função de callback no método ``addEventListener.`` A função de callback possui
+um parâmetro que faz referência ao evento executado, veja:
+
+```typescript
+const button = document.querySelector('button');
+
+//sempre recebe como argumento o evento que ocorreu.
+//depois, passamos o tipo de evento, existem DIVERSOS, poderia ser só "Event", por exemplo.
+function handleClick(event: MouseEvent) {
+    //mostra o eixo X do local clicado.
+  console.log(event.pageX);
+}
+
+//passamos geralmente dois argumentos, string (tipo de evento) e depois uma função que é utilizada de callback.
+button?.addEventListener('click', handleClick);
+
+function handleScroll(event: Event) {
+  console.log(event);
+}
+
+window.addEventListener('scroll', handleScroll);
+```
+
+Geralmente começar selecionando o elemento, passa o eventListener e cria o método com a ajuda da IDE, passa os argumentos
+e construa a função.
+
+A IDE mostra os possíveis eventos desejados:
+
+![img_2.png](img_2.png)
+
+
+## Event e instanceof
+
+Uma função quando criada para ser executada em diferentes tipos de eventos (evento de mouse e de touch ao mesmo tempo),
+deve receber como parâmetro o tipo comum entre elas, **Event**.
+
+
+```typescript
+//se aqui fosse MouseEvent ou TouchEvent, não iria funcionar para os dois
+function ativarMenu(event: Event) {
+    console.log(event.type)
+
+    if (event instanceof MouseEvent) {
+        //só é possivel acessar essa propriedade porque fizemos o instanceOff acima
+        console.log(event.pageX);
+    }
+
+    if (event instanceof TouchEvent) {
+        //só é possivel acessar essa propriedade porque fizemos o instanceOff acima
+        console.log(event.touches[0].pageX);
+    }
+}
+
+document.documentElement.addEventListener('mousedown', ativarMenu);
+document.documentElement.addEventListener('touchstart', ativarMenu);
+document.documentElement.addEventListener('pointerdown', ativarMenu);
+```
+
+## This em eventos de callback (não muito recomendado)
+
+Quando o this está dentro de uma função, ele fará referência ao objeto que executou a função em questão.
+
+No JavaScript, o this pode ser passado como o primeiro parâmetro da função, mesmo não sendo necessário informar ele
+durante a execução:
+
+```typescript
+const button = document.querySelector('button')
+
+function ativarMenu(this: HTMLButtonElement, event: MouseEvent) {
+    console.log(this.innerText);
+}
+
+button?.addEventListener('click', ativarMenu);
+```
+
+No caso em questão, o this fará referência ao objeto que está acionando a função, o ``button``.
+
+Outra coisa, o ``this`` precisa ser informado no parâmetro da função para não ser do tipo ``any``. Então SEMPRE passamos
+ele primeiro.
+
+Quando a função for atividade eventualmente, não precisa passar o this também, só o segundo argumento:
+
+![img_3.png](img_3.png)
+
+Como citamos no título, essa não é a maneira ideal de trabalhar. Para isso, utilizaremos ``target`` e ``currentTarget``.
+
+
+
+## target e currentTarget
+
+O typescript não executa o JavaScript, assim ele não consegue assumir qual será o target ou currentTarget do evento 
+executado.
+
+Os elementos são definidos como o tipo EventTarget, pois esse é o tipo mais comum entre os elementos que podem receber
+um evento.
+
+Portanto, para que ele funcione, precisamos verificar seu tipo, utilizando ``instanceOf``.
+
+![img_4.png](img_4.png)
