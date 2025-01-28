@@ -286,8 +286,6 @@ function execForEachLink(elements: NodeListOf<Element>) {
 execForEachLink(links);
 ```
 
-
-
 # Lidando com eventos e callbacks
 
 Passamos o evento como uma string e uma função de callback no método ``addEventListener.`` A função de callback possui
@@ -376,8 +374,6 @@ Quando a função for atividade eventualmente, não precisa passar o this també
 
 Como citamos no título, essa não é a maneira ideal de trabalhar. Para isso, utilizaremos ``target`` e ``currentTarget``.
 
-
-
 ## target e currentTarget
 
 O typescript não executa o JavaScript, assim ele não consegue assumir qual será o target ou currentTarget do evento 
@@ -389,3 +385,219 @@ um evento.
 Portanto, para que ele funcione, precisamos verificar seu tipo, utilizando ``instanceOf``.
 
 ![img_4.png](img_4.png)
+
+
+
+# Generics
+
+**Entenda bastante essa parte, pois iremos utilizar isso bastante.**
+
+Um tipo genérico é uma forma de declararmos um parâmetro para a nossa função, classe ou interface.
+
+Esse tipo pode ser indicado no momento do uso da função através do ``<Tipo>``, exemplo:
+
+![img_6.png](img_6.png)
+
+Pode parecer um pouco confuso a imagem acima, mas vamos aos poucos.
+
+Nós criamos uma função, definimos que seu retorno será do tipo ``<variavel>``. Após isso, declaramos depois do parâmetro
+o tipo ``:variavel`` e depois por fim, o que a função deve retornar: ``:variavel``.
+
+Note uma coisa: estamos retornando 3 coisas para uma mesma função: string, number e boolean e mesmo assim ele consegue
+identificar e deixar a gente usar os métodos de cada tipo primitivo (toLowerCase, etc), por quê?
+
+Basicamente o que o programa faz embaixo dos planos, é criar uma nova função para cada tipo, assim:
+
+![img_7.png](img_7.png)
+
+O mesmo acontece para o number e para tipo boolean.
+
+Poderíamos até mesmo passar o tipo direto na chamada da função:
+
+![img_8.png](img_8.png)
+
+## Generics com lista
+
+No exemplo abaixo, criamos duas arrays de números e frutas e depois, criamos uma função para retornar os cinco primeiros
+elementos.
+
+![img_9.png](img_9.png)
+
+Inicialmente, a função foi declarada para receber somente um array de number, mas e se quiséssemos receber arrays de
+outros tipos?
+
+![img_10.png](img_10.png)
+
+❗IMPORTANTE: O primeiro ``<>``, **é o que está dentro da lista**, o segundo depois de ``lista:`` é o que ela vai receber
+e por fim, o que ela vai retornar.
+
+Declarando dessa forma, nós podemos utilizar métodos de array. Sem essa declaração na função, não seria possível.
+
+![img_11.png](img_11.png)
+
+## Minimizando a nomenclatura <T>
+
+Ao invés de escrever coisas muito longas ali dentro, podemos resumir dessa maneira:
+
+![img_12.png](img_12.png)
+
+E nem sempre precisa indicar o retorno no final, a própria IDE já é capaz de identificar.
+
+## Exemplo 3
+
+Imagine uma função que vá retornar null ou o argumento:
+
+![img_13.png](img_13.png)
+
+De novo, qual o problema dela? Quando passamos um number, não é possivel executar a função e nem mesmo acessar os métodos
+de number! Portanto, passamos o Generics e resolvemos o problema:
+
+![img_14.png](img_14.png)
+
+## Exemplo 4 - generics com objetos
+
+![img_15.png](img_15.png)
+
+Como no exemplo acima, perfeito, estamos verificando o typeOf de string. Mas e se quiséssemos outros tipos? Boolean, 
+por exemplo?
+
+![img_16.png](img_16.png)
+
+Console:
+
+![img_17.png](img_17.png)
+
+
+
+## Extends
+
+Nós podemos indicar que o tipo genérico deve herdar de uma interface específica com o ``extends``.
+
+**Isso é muito importante, pois imagine que a gente queira receber dados somente do tipo ``HTMLElement`` ou derivados?**
+
+![img_18.png](img_18.png)
+
+Ao passar isso, o Typescript irá saber que o "element", DEVE herdar todas as características de ``HTMLElement``.
+
+## Métodos 
+
+Métodos nativos são definidos utilizando generics, assim podemos indicar durante a execução qual será o tipo esperado.
+
+```ts
+//define que o retorno será um HTMLAnchorElement
+const link = document.querySelector<HTMLAnchorElement>('link');
+//definindo isso, podemos acessar as propriedades do link
+link?.href;
+```
+
+**Entretanto, isso não quer dizer que dentro do HTML existe esse elemento, então precisa ter CUIDADO.** A forma
+mais segura ao declarar tipo no selector é colocar os métodos dentro de um if!
+
+```ts
+const link = document.querySelector<HTMLAnchorElement>('link');
+if (link instanceof HTMLAnchorElement) {
+    link?.href;
+}
+```
+
+-----
+
+Outro exemplo, é fazendo uma requisição a uma API. Sabemos que o retorno da promise sempre será "any", visto que não
+tem como saber o que de fato a API vai retornar.
+
+Para resolver isso, podemos criar uma interface para definir o tipo, veja:
+
+##### Antes
+
+```typescript
+async function getData(url: string) {
+    const response = await fetch(url);
+
+    return await response.json();
+}
+
+
+function handleData() {
+    const notebook = await getData("https://api.origamid.dev/json/notebook.json");
+    console.log(notebook);
+}
+
+handleData();
+```
+
+##### Depois
+
+Passamos que a função getData (no handleData) irá receber o tipo Notebook (definido na Interface).
+
+Já na própria getData em sí, receberá elemento do tipo <T> (ou seja, poderia ser um celular), o parâmetro continuará
+string (pois é a URL) e por fim a promise também será do tipo <T>.
+
+```typescript
+async function getData<T>(url: string): Promise<T> {
+    const response = await fetch(url);
+
+    return await response.json();
+}
+
+interface Notebook {
+    nome: string;
+    preco: number;
+}
+
+async function handleData() {
+    const notebook = await getData<Notebook>(
+        "https://api.origamid.dev/json/notebook.json"
+    );
+    console.log(notebook);
+}
+
+handleData();
+```
+
+## Resumão Generics
+
+É uma maneira de declarar um parâmetro em uma função/classe/interface.
+
+Passamos esse tipo logo no ínicio da função.
+
+```ts
+function retorno<variavel>(a: string): variavel {}
+```
+
+O ``<variavel>`` é o tipo do elemento, depois o que vai dentro do parâmetro (poderia ser <varivel>) também e por fim
+o que a função deve retornar.
+
+Ao realizar isso, nossa função nos permite acessar os métodos dos tipos primitivos.
+
+Em suma para que isso seja possível, para cada tipo utilizado, o programa cria uma função a parte.
+
+### Com lista
+
+Para utilizar generics com lista, é a mesma coisa! A diferença é que utilizamos no parâmetro o [].
+
+![img_19.png](img_19.png)
+
+❗IMPORTANTE: O primeiro <>, é o que está dentro da lista, o segundo depois de "lista:" é o que ela vai receber e por
+fim, o que ela vai retornar.
+
+Declarando dessa forma, nós podemos utilizar métodos de array. Sem essa declaração na função, não seria possível.
+
+### Não precisa usar <Tipo>
+
+Pode utilizar o ``<T>``, muito mais prático.
+
+#### Veja também
+
+- [Generics com objetos](#exemplo-4---generics-com-objetos)
+
+### Extends
+
+Após declarar o <T>, passamos o que ele irá extender (HTMLButtonElement, HTMLElement), e por aí vai.
+
+[Extends](#extends)
+
+### Métodos (QuerySelector com generics)
+
+Podemos definir generics em método nativo (tipo querySelector), [veja](#métodos-)
+
+
