@@ -601,3 +601,198 @@ Após declarar o <T>, passamos o que ele irá extender (HTMLButtonElement, HTMLE
 Podemos definir generics em método nativo (tipo querySelector), [veja](#métodos-)
 
 
+
+
+# Functions
+
+A interface da função é definida durante a sua declaração.
+
+![img_20.png](img_20.png)
+
+## Parâmetro opcional
+
+Podemos também definir parâmetros opcionais na função, basta utilizar ``c?: number``:
+
+![img_22.png](img_22.png)
+
+## Arrow functions
+
+```ts
+const subtrair = (a: number, b:number) => a - b;
+
+subtrair(4, 3)
+```
+
+## Definindo tipo com type
+
+Lembrando, isso ⬇️ é um tipo, não uma função. Pode ser utilizado para definir a propriedade de um método.
+
+```ts
+type CallBack = (event: MouseEvent) => void;
+```
+
+## Tipos de retorno
+
+Tipos em retorno em funções:
+
+- [Void/Undefind](#void)
+- [Never](#never)
+
+### Void
+
+No JavaScript, uma função sem return irá retornar ``undefined``. Já no TypeScript, o retorno é definido como ``void``.
+
+Isso evita usos errados como checagens booleanas de métodos que não possuem um retorno, exemplo de erros:
+
+```ts
+//essa funcao sempre vai retornar undefined
+function pintarTela(cor: string) {
+  document.body.style.background = cor;
+}
+
+pintarTela('black');
+
+// Erro, void não pode ser verificado.
+// pintarTela sempre vai retornar undefined, então não tem como fazer uma
+//verificação booleana
+if (pintarTela('black')) {
+}
+
+const btn = document.querySelector('button');
+
+// Erro, void não pode ser verificado
+if (btn && btn.click()) {
+    
+}
+```
+
+---
+
+Se a função tiver qualquer tipo de retorno, ela não terá mais o void como uma opção e sim o undefined.
+
+```ts
+function isString(value: any) {
+  if (typeof value === 'string') {
+    return true;
+  }
+}
+
+if (isString('teste')) {
+  console.log('É string');
+}
+```
+
+Ou seja: a função teve algum retorno? Então ela não é mais do tipo void! Porque a partir disso, ela pode ser utilizada
+para verificação booleana ou para acionar algum método (dependendo do seu retorno).
+
+### Never
+
+O never é utilizado em casos onde a função **gera um erro ou termina a aplicação**.
+
+```ts
+//no momento, ela está como void
+function abort(mensagem: string) {
+    throw new Error(mensagem);
+}
+```
+
+```ts
+function abort(mensagem: string): never {
+    throw new Error(mensagem);
+}
+
+abort("Erro ocorreu");
+console.log("Tente novamente"); //esse codigo não vai acontecer, pois acima terá um erro, finalizando o programa
+```
+
+Outro exemplo de never é em métodos ``async``, onde fazemos um fetch em uma URL que não existe. Isso vai acabar quebrando
+nosso código.
+
+## Métodos
+
+Na definição de interfaces podemos definir os métodos indicando o **tipo de dado recebido** e o seu possível **retorno**.
+
+```ts
+interface Quadrado {
+    lado: number;
+    perimetro(lado: number): number;
+}
+
+function calcular(forma: Quadrado) {
+    //podemos acessar tanto o atributo lado, quanto o método criado
+    form.lado;
+    forma.perimetro(3);
+}
+```
+
+## Overload
+
+Existem funções que retornam diferentes dados dependendo do argumento.
+
+Podemos declarar a interface dessas funções utilizando ``fuction overload``. Basta declarar a interface antes da 
+definição da mesma, utilizando o **MESMO NOME**.
+
+O Overload deve ser compatível com a função original.
+
+```ts
+//declara sem abrir {}
+function normalizar(valor: string): string;
+function normalizar(valor: string[]): string[];
+
+//primeiro definimos a função e acima dela ⬆️ declaramos as outras separadas,
+//fazendo o Overload
+function normalizar(valor: string | string[]): string | string[] {
+    if (typeof valor == 'string') {
+        return valor.trim().toLowerCase();
+    } else {
+        return valor.map(item => item.trim().toLowerCase());
+    }
+}
+
+console.log(normalizar(" Produto "));
+console.log(normalizar([" Banana", "UVA   "]));
+```
+
+Realizando esse Overload, ele nos permite por exemplo, acessar as propriedades do tipo (lowerCase), no final.
+
+**❗IMPORTANTE: se você cria um Overload, você precisa criar os outros. No nosso caso, criar uma função somente para 
+``string[]``, resultaria erro na que é somente string.**
+
+## Seletores usam Overload
+
+Quando usamos o querySelector e passamos um seletor nele, veja:
+
+```ts
+//isso diz que ele pode retornar um HTMLAnchorElement ou null
+document.querySelector('a');
+```
+
+Essa é a interface do HTMLElement, ele faz um loop em uma interface procurando o tipo que passamos, para que ele
+retorne o correto.
+
+![img_23.png](img_23.png)
+
+Vamos criar uma função utilizando ela da mesma forma que o querySelector faz, veja:
+
+```ts
+function $(seletor: string): Element | null {
+    return document.querySelector(seletor);
+}
+
+$('a') // vai retornar element ou null pois ele não consegue saber o que é
+```
+
+Para que ele consiga saber o que estamos selecionando, fazemos o Overload, veja:
+
+```ts
+//frisando: HTMLAnchor/Video... tudo herda de Element!
+function $(seletor: 'a'): HTMLAnchorElement | null;
+function $(seletor: 'video'): HTMLVideoElement | null;
+function $(seletor: 'string'): Element | null; //permite selecionar uma classe
+function $(seletor: string): Element | null {
+    return document.querySelector(seletor);
+}
+
+$('a')?.href // agora é possivel acessar os atributos
+```
+

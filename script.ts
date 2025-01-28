@@ -1,22 +1,28 @@
+// Crie uma função que arredonda um valor passado para cima.
+// A função pode receber string ou number.
+// A função deve retornar o mesmo tipo que ela receber.
 
+function fixValue(valor: number): number;
+function fixValue(valor: string): string;
 
+function fixValue(valor: number | string): number | string {
+    if (typeof valor == 'string') {
+        return Number(valor).toFixed();
+    } else {
+        return Math.ceil(valor);
+    }
 
-async function getData<T>(url: string): Promise<T> {
-    const response = await fetch(url);
-
-    return await response.json();
 }
 
-interface Notebook {
-    nome: string;
-    preco: number;
+console.log(fixValue(3.6));
+console.log(fixValue('3.6'));
+
+
+function $(seletor: 'a'): HTMLAnchorElement | null;
+function $(seletor: 'video'): HTMLVideoElement | null;
+function $(seletor: 'string'): Element | null; //permite selecionar uma classe
+function $(seletor: string): Element | null {
+    return document.querySelector(seletor);
 }
 
-async function handleData() {
-    const notebook = await getData<Notebook>(
-        "https://api.origamid.dev/json/notebook.json"
-    );
-    console.log(notebook);
-}
-
-handleData();
+$('a')?.href // agora é possivel acessar os atributos
