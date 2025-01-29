@@ -75,7 +75,7 @@ produto.autor;
 O JavaScript também trabalha muito com a questão de herança. Portanto, um objeto pode extender o objeto anterior, herdando
 suas características.
 
-O instanceof também verifica essa herdança.
+O instanceof também verifica essa herança.
 
 Abaixo, é o mesmo exemplo de acima. Criamos uma classe Produto que possui um nome do tipo String.
 
@@ -582,9 +582,9 @@ fim, o que ela vai retornar.
 
 Declarando dessa forma, nós podemos utilizar métodos de array. Sem essa declaração na função, não seria possível.
 
-### Não precisa usar <Tipo>
+### Não precisa usar "<Tipo>"
 
-Pode utilizar o ``<T>``, muito mais prático.
+Pode utilizar o ``<T>`` muito mais prático.
 
 #### Veja também
 
@@ -599,9 +599,6 @@ Após declarar o <T>, passamos o que ele irá extender (HTMLButtonElement, HTMLE
 ### Métodos (QuerySelector com generics)
 
 Podemos definir generics em método nativo (tipo querySelector), [veja](#métodos-)
-
-
-
 
 # Functions
 
@@ -796,3 +793,218 @@ function $(seletor: string): Element | null {
 $('a')?.href // agora é possivel acessar os atributos
 ```
 
+
+
+
+
+# Type Guard e Control Flow
+
+Desde o início do curso estamos fazendo o uso de Type Guard, utilizando typeof (verificando tipos primitivos) e instanceof
+para verificar se um objeto herda algo de um construtor.
+
+O Type Guard garante a Type Safety do dado dentro do bloco condicional (if). Esse processo é chamado de Type Narrowing,
+ou, **estreitamento**.
+
+O TypeScript faz o Control Flow (controle de fluxo), visando entender qual o dado dentro da condicional, veja o exemplo:
+
+```ts
+function typeGuard(value: any) {
+  if (typeof value === 'string') {
+    return value.toLowerCase(); // aqui ocorre o narrowing, ou seja, esse dado só pode ser string
+  }
+  if (typeof value === 'number') {
+    return value.toFixed();
+  }
+  if (value instanceof HTMLElement) {
+    return value.innerText;
+  }
+}
+
+typeGuard('Origamid');
+typeGuard(200);
+typeGuard(document.body);
+```
+
+Guard garante safety, que gera o estreitamento. E todo o processo é realizado pelo TypeScript que faz o controle de fluxo.
+
+## Operador "In"
+
+Esse operador verifica se o objeto possui uma propriedade com o mesmo nome da string comparada "propriedade" in obj, irá
+retornar true ou false.
+
+```ts
+const obj = {
+    nome: "Origamid",
+}
+
+//sempre passe a propriedade como string
+if ('nome' in obj) {
+    console.log("Sim");
+}
+```
+
+Outro exemplo, com fetch:
+
+![img_25.png](img_25.png)
+
+Sem esse Type Guard, por exemplo, se o campo não existisse, ele iria aparecer de qualquer jeito no HTML. Seria um campo
+undefined sendo somado a 100, resultaria em um "NaN".
+
+## Unknown
+
+Indica que não sabemos o tipo de dado que será passado. **Ele é diferente do any!** O unknown só irá permitir o uso de métodos
+quando a Type Safety estiver garantida, veja:
+
+![img_26.png](img_26.png)
+
+Repare que ele deixa a gente passar os valores na chamada da função, mas dentro dela, ele não permite a gente usar
+o método ``toUpperCase()``.
+
+Agora, se realizarmos a Type Safety, isto é, verificar o tipo de dado (primitivo, ou HTMLElement), será possível
+utilizar os métodos:
+
+![img_27.png](img_27.png)
+
+
+
+## Verificando se uma Array é de fato Array
+
+Uma Array não pode ser verificada com typeOf, pois ela é um object.
+
+Podemos verificar se o dado é ``instance of Array`` ou podemos usar a função ``Array.isArray()``, veja:
+
+![img_30.png](img_30.png)
+
+### Type Predicate (diz o tipo do dado)
+
+Já sabemos que o TS não executa o JS durante a checagem dos tipos. Se isso ocorre, então, porque a função isArray consegue
+ser usada como Type Guard, dizendo se é true ou false?
+
+Bom, na verdade, o TS não consegue identificar. Porém, utilizando o Type Predicate ":arg is type", podemos indicar qual
+o tipo de argumento, veja o exemplo abaixo:
+
+**A partir do momento que colocamos o "is", a função se torna booleana.**
+
+![img_31.png](img_31.png)
+
+Entenda: o nosso programa NÃO está executando essa função de "isString", mas ele garante que ao rodar o código caso ela
+seja true, será de fato uma string, consegue "prever" o futuro.
+
+#### Type Predicate com objetos
+
+O Type Predicate pode ser especialmente utilizado para criarmos Type Guards para objetos específicos e garantirmos 
+a Type Safety do programa.
+
+Utilizando em objetos, podemos verificar se os objetos possuem certos métodos ou propriedades, veja:
+
+![img_32.png](img_32.png)
+
+Utilizamos a função fetch de sempre, e criamos o método para verificar se de fato é um produto, utilizando este método
+dentro de outra função para lidar com os dados.
+
+## Type Assertion (as)
+
+Com o type assertion, podemos "indicar" ao TS qual tipo de dado esperado com a palavra-chave "as". Só é possível indicar
+tipos que possuem relação com o tipo original.
+
+Devemos evitar ao máximo o uso de Type Assertion, pois a segurança (Type Safety) é perdida quando indicamos algo que nem
+sempre pode ser verdade, veja o exemplo abaixo:
+
+![img_33.png](img_33.png)
+
+Só use quando você tem certeza ABSOLUTA que esse elemento de fato existe.
+
+### Type Assertion com any (em Fetch)
+
+Podemos usar o type assertion para definir que um tipo any é qualquer tipo de dado possível. Um belo exemplo disso é no
+fetch.
+
+Já comentamos que geralmente uma fetch retorna any, pois não sabemos o tipo de dado esperado, correto? Entretanto, se
+estamos dando fetch em uma API de produto, nós sabemos o tipo esperado de dado e podemos indicar isso na função:
+
+![img_34.png](img_34.png)
+
+Com isso, dentro de função de handle, será possível acessar as propriedades da interface:
+
+![img_35.png](img_35.png)
+
+### !, non-null operator (raro utilizar)
+
+Ele indica que não existe a possibilidade do dado ser null. CUIDADO com o uso, pois pode levar a erros no runtime. Só 
+use se tiver certeza.
+
+Esse é um operador de TS "!". e não de JS como o "?".. Durante a compilação ele será removido.
+
+![img_36.png](img_36.png)
+
+# Destructuring - Desestruturando objetos
+
+Como desestruturar objetos indicando seu tipo de dado.
+
+Durante a desestruturação de objetos, podemos indicar o tipo de dado com a sintaxe: { key1, key2 }: { key1: type1; key2: type2; }
+
+Pega a propriedade de body e aloca em uma constante ⬇️
+
+![img_37.png](img_37.png)
+
+Indicando o tipo de dado a ser alocado na variável ⬇️
+
+![img_38.png](img_38.png)
+
+---
+
+Entretanto, iremos utilizar mais essa sintaxe de desestruturação em funções:
+
+Imagine uma função chamada handleData que irá receber um objeto que tem diversas propriedades, entretanto queremos
+só a propriedade "nome", fariamos isso:
+
+
+Para frisar e entender:
+
+1. fazemos a desestruturação, ou seja, declarar a propriedade assim "{nome}".
+2. Depois, passamos o ":", abrimos um objeto, definimos o nome e seu tipo de dado.
+
+``({nome}: {nome: string})``
+
+Se tivesse mais propriedades a serem desestruturadas:
+
+``({nome, preco}: {nome: string; preco: number})``
+
+![img_39.png](img_39.png)
+
+Por fim, caso essa declaração fique muito grande, é só criar uma interface, ficará assim:
+
+![img_40.png](img_40.png)
+
+Permanece a desestruturação, com a interface depois.
+
+## Cuidado, conheça os dados
+
+Quando você começa a desestruturar, é necessário indicar o tipo exato do dado esperado pelo TS. Exemplo: um currentTarget
+pode ser EventTarget | null.
+
+# Anotações para resumo final
+
+Instanceof é para:
+
+typeof é para:
+
+A melhor forma de se lidar com dados que vem de fora (tipo dando fetch numa API), é utilizando "unknown" no parâmetro.
+Isso porque não fazemos a menor ideia do tipo de dado que será retornado dessa API.
+
+E após isso, dentro da função, podemos utilizar Type guard para manipular os dados.
+
+```ts
+function handleCursos(data: unknown) {
+    //realizando o typeguard, podemos assim, utilizar os métodos de Array
+    if (data instanceof Array) {
+        data.filter()
+        data.forEach()
+    }
+    //essa forma só funciona com Type Predicate
+    if (Array.isArray(data)) {
+        data.filter()
+        data.forEach()
+    }
+}
+```

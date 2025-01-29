@@ -1,28 +1,24 @@
-// Crie uma função que arredonda um valor passado para cima.
-// A função pode receber string ou number.
-// A função deve retornar o mesmo tipo que ela receber.
 
-function fixValue(valor: number): number;
-function fixValue(valor: string): string;
 
-function fixValue(valor: number | string): number | string {
-    if (typeof valor == 'string') {
-        return Number(valor).toFixed();
-    } else {
-        return Math.ceil(valor);
-    }
+//pegamos o body que está dentro de document
+// const {body} = document;
 
+//para indicar o tipo de dado a ser alocado
+const {body}: {body: HTMLElement } = document;
+
+interface Produto {
+    nome: string;
+    preco: number;
 }
 
-console.log(fixValue(3.6));
-console.log(fixValue('3.6'));
+function handleData( {nome, preco}: Produto ) {
 
-
-function $(seletor: 'a'): HTMLAnchorElement | null;
-function $(seletor: 'video'): HTMLVideoElement | null;
-function $(seletor: 'string'): Element | null; //permite selecionar uma classe
-function $(seletor: string): Element | null {
-    return document.querySelector(seletor);
+    //com a desestruturação feita, podemos utilizar os métodos
+    nome.includes('book');
+    preco.toFixed();
 }
 
-$('a')?.href // agora é possivel acessar os atributos
+handleData({
+    nome: "Notebook",
+    preco: 1500
+});
