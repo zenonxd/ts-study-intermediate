@@ -794,9 +794,6 @@ $('a')?.href // agora é possivel acessar os atributos
 ```
 
 
-
-
-
 # Type Guard e Control Flow
 
 Desde o início do curso estamos fazendo o uso de Type Guard, utilizando typeof (verificando tipos primitivos) e instanceof
@@ -981,7 +978,47 @@ Permanece a desestruturação, com a interface depois.
 ## Cuidado, conheça os dados
 
 Quando você começa a desestruturar, é necessário indicar o tipo exato do dado esperado pelo TS. Exemplo: um currentTarget
-pode ser EventTarget | null.
+pode ser EventTarget | null, veja:
+
+![img_41.png](img_41.png)
+
+O currentTarget (onde estamos clicando na tela), ele vai retornar um HTMLElement ou null, então precisamos declarar isso
+no parâmetro da função.
+
+Mesma coisa com o pageX, esperamos dele um number.
+
+Adendo: só será possível acessar as propriedades de "currentTarget" se fazermos o type safety com o if.
+
+## ...rest
+
+O operador "...rest" retorna uma Array.
+
+![img_42.png](img_42.png)
+
+# Intersection (&)
+
+Quando temos um "type" (tipo) e queremos extender ele.
+
+Funciona em parte como o "extends" para interfaces, mas pode ser utilizado em Types.
+
+Se tivéssemos utilizando "|" ao invés de "&", não seria possivel acessar as propriedades, pois daí seria "ou um, ou outro".
+
+## Adicionando propriedades ao type com (&)
+
+É possível adicionar uma propriedade a uma interface/tipo que já definido.
+
+### Com types
+
+Não é possivel reutilizar o nome! Na interface, sim, é possível.
+
+![img_43.png](img_43.png)
+
+### Com interface
+
+Já em interface é diferente, para adicionar uma propriedade desejada precisamos REESCREVER com o mesmo nome da interface
+de cima.
+
+![img_44.png](img_44.png)
 
 # Anotações para resumo final
 
